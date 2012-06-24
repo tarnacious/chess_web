@@ -13,6 +13,7 @@ start(_Type, _Args) ->
 	Dispatch = [
 		{'_', [
 			{[<<"websocket">>], websocket_handler, []},
+            {[<<"static">>, '...'], cowboy_http_static,[{directory, {priv_dir, chess_web, [<<"public">>]}}]},
 			{'_', default_handler, []}
 		]}
 	],
