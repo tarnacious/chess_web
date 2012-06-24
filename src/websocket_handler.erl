@@ -21,17 +21,26 @@ terminate(_Req, _State) ->
 	ok.
 
 websocket_init(_Any, Req, []) ->
-	timer:send_interval(1000, tick),
 	Req2 = cowboy_http_req:compact(Req),
 	{ok, Req2, undefined, hibernate}.
 
+websocket_handle({text, << "start" >> }, Req, State) ->
+    io:format("Client start message:~n", []),
+    {ok, Content} = new_game_dtl:render([]),
+	{reply, {text, Content}, Req, State, hibernate};
+
 websocket_handle({text, Msg}, Req, State) ->
-	{reply, {text, << "You said: ", Msg/binary >>}, Req, State, hibernate};
+    io:format("Client message:~n~p~n", [Msg]),
+    Pid = spawn(chess, move, [Msg,self()]),
+    {ok, Req, State, hibernate};
+
 websocket_handle(_Any, Req, State) ->
 	{ok, Req, State}.
 
-websocket_info(tick, Req, State) ->
-	{reply, {text, <<"Tick">>}, Req, State, hibernate};
+websocket_info({move, Msg}, Req, State) ->
+    io:format("Server message: ~n~p~n", [Msg]),
+	{reply, {text, Msg}, Req, State, hibernate};
+
 websocket_info(_Info, Req, State) ->
 	{ok, Req, State, hibernate}.
 

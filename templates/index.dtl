@@ -7,6 +7,11 @@ function addStatus(text){
 		= document.getElementById('status').innerHTML
 		+ date + ": " + text + "<br/>";
 }
+function chess(text){
+	var date = new Date();
+	document.getElementById('board').innerHTML
+		= text;
+}
 function ready(){
 	if ("MozWebSocket" in window) {
 		WebSocket = MozWebSocket;
@@ -18,12 +23,13 @@ function ready(){
 			// websocket is connected
 			addStatus("websocket connected!");
 			// send hello data to server.
-			ws.send("hello server!");
-			addStatus("sent message to server: 'hello server'!");
+			ws.send("start");
+			// addStatus("sent message to server: 'hello server'!");
 		};
 		ws.onmessage = function (evt) {
 			var receivedMsg = evt.data;
-			addStatus("server sent the following: '" + receivedMsg + "'");
+			chess(receivedMsg);
+			ws.send(receivedMsg);
 		};
 		ws.onclose = function() {
 			// websocket was closed
@@ -31,13 +37,13 @@ function ready(){
 		};
 	} else {
 		// browser does not support websockets
-		addStatus("sorry, your browser does not support websockets.");
+		addStatus("browser does not support websockets.");
 	}
 }
 </script>
 </head>
 <body onload="ready();">
-Hi!
+<pre id="board"> </pre>
 <div id="status"></div>
 </body>
 </html>
